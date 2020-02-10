@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :authenticate_member!, except: [:index]
+  before_action :authenticate_member!, except: [:index, :show]
   before_action :set_customer, only: [:show, :edit, :update, :destroy]
 
   # GET /customers
@@ -24,26 +24,37 @@ class CustomersController < ApplicationController
   def create
     @customer = Customer.new(customer_params)
 
-    if @customer.save
-      redirect_to @customer, notice: 'Customer was successfully created.'
-    else
-      render :new
+    respond_to do |format|
+      if @customer.save
+        format.html { redirect_to @customer, notice: 'Customer was successfully created.' }
+        format.json { render :show, status: :created, location: @customer }
+      else
+        format.html { render :new }
+        format.json { render json: @customer.errors, status: :unprocessable_entity }
+      end
     end
   end
 
   # PATCH/PUT /customers/1
   def update
-    if @customer.update(customer_params)
-      redirect_to @customer, notice: 'Customer was successfully updated.'
-    else
-      render :edit
+    respond_to do |format|
+      if @customer.update(customer_params)
+        format.html { redirect_to @customer, notice: 'Customer was successfully updated.' }
+        format.json { render :show, status: :ok, location: @customer }
+      else
+        format.html { render :edit }
+        format.json { render json: @customer.errors, status: :unprocessable_entity }
+      end
     end
   end
 
   # DELETE /customers/1
   def destroy
     @customer.destroy
-    redirect_to customers_url, notice: 'Customer was successfully destroyed.'
+    respond_to do |format|
+      format.html { redirect_to customers_url, notice: 'Customer was successfully destroyed.' }
+      format.json { head :no_content }
+    end
   end
 
   private
